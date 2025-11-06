@@ -95,4 +95,13 @@ rfm = Utils.compute_rfm(df_valid)
 rfm = Utils.score_rfm(rfm)
 rfm = Utils.segment_customers(rfm)
 
-print(rfm.columns)
+#print(rfm.head())
+
+
+# Build customer profile
+
+customer_profile = Utils.build_customer_profile(df_valid, rfm)
+
+print(customer_profile.columns) #['Recency', 'Frequency', 'Monetary', 'R_Score', 'F_Score', 'M_Score','RFM_Score', 'Segment', 'TotalQuantity', 'TotalSpent', 'UniqueProducts','TopCategory', 'TopCountry', 'WeekendPurchaseRatio']
+
+print(customer_profile.head())

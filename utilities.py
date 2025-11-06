@@ -43,3 +43,26 @@ class Utils:
                 return 'Lost'
         rfm['Segment'] = rfm.apply(segment, axis=1)
         return rfm
+
+    def build_customer_profile(df, rfm):
+        """
+        Creates a customer profile by combining RFM metrics
+        with purchase behavior features (habits).
+        """
+        habits = df.groupby('CustomerID').agg({
+            'Quantity': 'sum',
+            'StockCode': 'nunique',
+            'category': lambda x: x.mode()[0] if len(x.mode()) > 0 else None, # Top category
+            'IsWeekend': 'mean',  # % of weekend purchases
+        }).rename(columns={
+            'Quantity': 'TotalQuantity',
+            'TotalPrice': 'TotalSpent',
+            'StockCode': 'UniqueProducts',
+            'category': 'TopCategory',
+            'Country': 'TopCountry',
+            'IsWeekend': 'WeekendPurchaseRatio'
+        })
+
+        customer_profile = rfm.merge(habits, on='CustomerID', how='left')
+        return customer_profile
+
