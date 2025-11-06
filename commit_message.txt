@@ -1,0 +1,5 @@
+BigQuery kullanıcı OAuth akışı eklendi ve veri CSV olarak kaydedildi
+
+- pydata-google-auth / pandas-gbq ile OAuth kuruldu
+- full_features_raw.csv oluşturuldu
+- .gitignore ve requirements güncellendi
