@@ -3,3 +3,13 @@
 target/
 dbt_packages/
 logs/
+.venv/
+.env
+__pycache__/
+.ipynb_checkpoints/
+# secrets / keys
+*.key.json
+*_key.json
+*_sa.json
+secrets/*.json
+.keys/*.json
