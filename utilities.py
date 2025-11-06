@@ -1,4 +1,6 @@
 import pandas as pd
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
 
 class Utils:
     def filter_valid_customers(df):
@@ -65,4 +67,38 @@ class Utils:
 
         customer_profile = rfm.merge(habits, on='CustomerID', how='left')
         return customer_profile
+
+    # The following functions are retained from segmentation.py for potential reuse  
+    
+
+    def build_rfm(df):
+        """Create a simple RFM table from your transaction data."""
+        df = df[df['CustomerID'].notnull()].copy()
+        df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'])
+
+        snapshot_date = df['InvoiceDate'].max() + pd.Timedelta(days=1)
+
+        rfm = df.groupby('CustomerID').agg({
+            'InvoiceDate': lambda x: (snapshot_date - x.max()).days,  # Recency
+            'InvoiceNo': 'nunique',                                   # Frequency
+            'TotalPrice': 'sum'                                       # Monetary
+        }).rename(columns={'InvoiceDate': 'Recency', 'InvoiceNo': 'Frequency', 'TotalPrice': 'Monetary'})
+
+        return rfm
+
+
+    def segment_customers(rfm, k=4):
+        """Cluster customers using K-Means on R, F, M."""
+        scaler = StandardScaler()
+        X = scaler.fit_transform(rfm[['Recency', 'Frequency', 'Monetary']])
+
+        kmeans = KMeans(n_clusters=k, random_state=42)
+        rfm['Cluster'] = kmeans.fit_predict(X)
+
+        return rfm
+
+
+    def describe_clusters(rfm):
+        """Quick summary showing the average R, F, M for each cluster."""
+        return rfm.groupby('Cluster').mean().round(2)
 

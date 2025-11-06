@@ -4,3 +4,4 @@ pandas==2.3.3
 pandas-gbq==0.30.0
 pydata-google-auth==1.9.1
 tqdm==4.67.1
+scikit-learn
