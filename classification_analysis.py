@@ -1,4 +1,4 @@
-# User-OAuth BigQuery connect + smoke test
+"""# User-OAuth BigQuery connect + smoke test
 
 #import pydata_google_auth
 #from google.cloud import bigquery
@@ -65,7 +65,34 @@ rfm = df_valid.groupby('CustomerID').agg({
     'TotalPrice': 'sum'                                       # Monetary
 }).rename(columns={'InvoiceDate': 'Recency', 'InvoiceNo': 'Frequency', 'TotalPrice': 'Monetary'})
 
-print("RFM head:\n", rfm.head())
 
 # Save RFM to CSV
+#rfm.to_csv("data/rfm_analysis.csv")
+
+# RFM Scoring
+
+rfm['R_Score'] = pd.qcut(rfm['Recency'], 5, labels=[5,4,3,2,1]).astype(int)
+rfm['F_Score'] = pd.qcut(rfm['Frequency'].rank(method='first'), 5, labels=[1,2,3,4,5]).astype(int)
+rfm['M_Score'] = pd.qcut(rfm['Monetary'], 5, labels=[1,2,3,4,5]).astype(int)
+
+rfm['RFM_Score'] = rfm['R_Score'] + rfm['F_Score'] + rfm['M_Score'] # Combine scores to get overall RFM score out of 15
+print("RFM head:\n", rfm.head())
+# Save RFM scores to CSV
 rfm.to_csv("data/rfm_analysis.csv")
+
+"""
+
+from utilities import Utils
+import pandas as pd
+
+# Load your data
+df = pd.read_csv("data/full_features_raw.csv")
+df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'])
+
+# Use your utility functions on demand
+df_valid = Utils.filter_valid_customers(df)
+rfm = Utils.compute_rfm(df_valid)
+rfm = Utils.score_rfm(rfm)
+rfm = Utils.segment_customers(rfm)
+
+print(rfm.columns)
