@@ -1,5 +1,7 @@
-BigQuery kullanıcı OAuth akışı eklendi ve veri CSV olarak kaydedildi
+feat: K-Means ile müşteri segmentasyonu eklendi
 
-- pydata-google-auth / pandas-gbq ile OAuth kuruldu
-- full_features_raw.csv oluşturuldu
-- .gitignore ve requirements güncellendi
+- RFM tablosu oluşturularak K-Means algoritması ile müşteri kümeleri belirlendi
+- Cluster ortalamaları analiz edilerek segment isimleri (Champions, Loyal, Lost vb.) atandı
+- Silhouette skoru ile modelin başarımı ölçüldü (0.614 → güçlü ayrışma)
+- Segment sonuçları CSV formatında kaydedildi
+- segmentation.py ve utilities.py dosyaları güncellendi
