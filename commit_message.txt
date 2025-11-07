@@ -1,0 +1,7 @@
+feat: K-Means ile müşteri segmentasyonu eklendi
+
+- RFM tablosu oluşturularak K-Means algoritması ile müşteri kümeleri belirlendi
+- Cluster ortalamaları analiz edilerek segment isimleri (Champions, Loyal, Lost vb.) atandı
+- Silhouette skoru ile modelin başarımı ölçüldü (0.614 → güçlü ayrışma)
+- Segment sonuçları CSV formatında kaydedildi
+- segmentation.py ve utilities.py dosyaları güncellendi
