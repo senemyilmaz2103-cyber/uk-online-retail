@@ -1,0 +1,42 @@
+sources:
+  - name: raw
+    schema: uk_online_retail
+    tables:
+      - name: online_retail
+        identifier: uk_online
+models:
+  - name: mart_customer_profile
+    description: "Her müşteri için RFM, churn, segment, AOV ve son işlem metriklerini içeren nihai model."
+    columns:
+      - name: CustomerID
+        description: "Müşteri kimliği."
+        tests:
+          - not_null
+          - unique
+
+      - name: monetary
+        description: "Müşterinin toplam harcama tutarı (RFM Monetary)."
+        tests:
+          - not_null
+
+      - name: frequency
+        description: "Müşterinin yaptığı toplam alışveriş sayısı (RFM Frequency)."
+        tests:
+          - not_null
+
+      - name: recency_days
+        description: "Son alışverişten bu yana geçen gün sayısı (RFM Recency)."
+        tests:
+          - not_null
+
+      - name: churn_flag
+        description: "Müşteri 90+ gündür alışveriş yapmadıysa True."
+
+      - name: rfm_score
+        description: "R + F + M skorlarının toplamı (ölçek: 3–15)."
+
+      - name: customer_segment
+        description: "RFM skoruna göre müşteri segmenti (ör. Loyal, Regular, At Risk)."
+
+      - name: return_rate
+        description: "Toplam iadelerin toplam satışa oranı."
