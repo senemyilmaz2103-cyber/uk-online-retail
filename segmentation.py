@@ -34,12 +34,22 @@ default_labels = [
     "Lost / Hibernating"
 ]
 
-ranking = summary.assign(
-    RecencyRank=summary["Recency"].rank(method="dense", ascending=True),
-    FrequencyRank=summary["Frequency"].rank(method="dense", ascending=False),
-    MonetaryRank=summary["Monetary"].rank(method="dense", ascending=False)
-)
-ranking["Score"] = ranking["FrequencyRank"] + ranking["MonetaryRank"] - ranking["RecencyRank"]
+def _scale(series, invert=False):
+    min_val = series.min()
+    max_val = series.max()
+    if max_val == min_val:
+        return pd.Series(1.0, index=series.index)
+    scaled = (series - min_val) / (max_val - min_val)
+    if invert:
+        scaled = 1 - scaled
+    return scaled
+
+
+ranking = summary.copy()
+ranking["RecencyScore"] = _scale(ranking["Recency"], invert=True)
+ranking["FrequencyScore"] = _scale(ranking["Frequency"], invert=False)
+ranking["MonetaryScore"] = _scale(ranking["Monetary"], invert=False)
+ranking["Score"] = ranking["RecencyScore"] + ranking["FrequencyScore"] + ranking["MonetaryScore"]
 ordered_clusters = ranking.sort_values("Score", ascending=False).index.tolist()
 cluster_names = {
     cluster_id: (default_labels[i] if i < len(default_labels) else f"Segment {i+1}")
