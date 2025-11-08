@@ -29,7 +29,7 @@ class Utils:
         rfm['RFM_Score'] = rfm['R_Score'] + rfm['F_Score'] + rfm['M_Score']
         return rfm
 
-    def segment_customers(rfm):
+    def segment_customers_rule_based(rfm):
         """Segments customers based on RFM_Score."""
         def segment(row):
             s = row['RFM_Score']
@@ -87,7 +87,7 @@ class Utils:
         return rfm
 
 
-    def segment_customers(rfm, k=4):
+    def segment_customers_kmeans(rfm, k=4):
         """Cluster customers using K-Means on R, F, M."""
         scaler = StandardScaler()
         X = scaler.fit_transform(rfm[['Recency', 'Frequency', 'Monetary']])

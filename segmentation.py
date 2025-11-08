@@ -1,7 +1,16 @@
 import pandas as pd
-import utilities as u  
+import utilities as u
 from sklearn.metrics import silhouette_score
 from sklearn.preprocessing import StandardScaler
+
+
+def _format_id(value):
+    if pd.isna(value):
+        return ""
+    text = str(value).strip()
+    if text.endswith(".0") and text[:-2].isdigit():
+        text = text[:-2]
+    return text
 
 # Load your dataset
 df = pd.read_csv('data/full_features_raw.csv')
@@ -10,27 +19,43 @@ df = pd.read_csv('data/full_features_raw.csv')
 rfm = u.Utils.build_rfm(df)
 
 # 2️⃣ Run K-Means (try 4 clusters)
-rfm = u.Utils.segment_customers(rfm, k=4)
+rfm = u.Utils.segment_customers_kmeans(rfm, k=4)
 
 # 3️⃣ See what each cluster looks like
 summary = u.Utils.describe_clusters(rfm)
 
-# 4️⃣ Map cluster numbers to meaningful names
+# 4️⃣ Dynamically map clusters to business-friendly labels
+default_labels = [
+    "Champions / VIPs",
+    "Loyal Customers",
+    "Potential Loyalists",
+    "At Risk",
+    "Lost / Hibernating"
+]
+
+ranking = summary.assign(
+    RecencyRank=summary["Recency"].rank(method="dense", ascending=True),
+    FrequencyRank=summary["Frequency"].rank(method="dense", ascending=False),
+    MonetaryRank=summary["Monetary"].rank(method="dense", ascending=False)
+)
+ranking["Score"] = ranking["FrequencyRank"] + ranking["MonetaryRank"] - ranking["RecencyRank"]
+ordered_clusters = ranking.sort_values("Score", ascending=False).index.tolist()
 cluster_names = {
-    0: "Loyal Customers",
-    1: "Lost / At Risk",
-    2: "Champions / VIPs",
-    3: "Potential Loyalists"
+    cluster_id: (default_labels[i] if i < len(default_labels) else f"Segment {i+1}")
+    for i, cluster_id in enumerate(ordered_clusters)
 }
 
-rfm["Cluster"] = rfm["Cluster"].astype(int)  # güvenli olsun, map anahtarları int
+rfm["Cluster"] = rfm["Cluster"].astype(int)
 rfm["Segment"] = rfm["Cluster"].map(cluster_names)
+
+# Ensure CustomerID is exported as string
+rfm = rfm.reset_index().rename(columns={"index": "CustomerID"})
+rfm["CustomerID"] = rfm["CustomerID"].apply(_format_id)
 
 print(rfm.head())
 print("\nCluster summary:\n", summary)
 
-rfm.to_csv("data/rfm_kmeans_results.csv", index=True)
-
+rfm.to_csv("data/rfm_kmeans_results.csv", index=False)
 
 
 # 5️⃣ Evaluate clustering quality with Silhouette Score ranging from -1 to +1. Good scores are > 0.5
