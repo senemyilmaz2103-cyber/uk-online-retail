@@ -14,6 +14,7 @@ def _format_id(value):
 
 # Load your dataset
 df = pd.read_csv('data/full_features_raw.csv')
+df = df[df["UnitPrice"] > 0]
 
 # 1️⃣ Build RFM
 rfm = u.Utils.build_rfm(df)
@@ -52,10 +53,12 @@ rfm["Segment"] = rfm["Cluster"].map(cluster_names)
 rfm = rfm.reset_index().rename(columns={"index": "CustomerID"})
 rfm["CustomerID"] = rfm["CustomerID"].apply(_format_id)
 
-print(rfm.head())
+rfa = rfm[rfm["Monetary"] > 0].copy()
+rfa.to_csv("data/rfm_kmeans_results.csv", index=False)
+
+print(rfa.head())
 print("\nCluster summary:\n", summary)
 
-rfm.to_csv("data/rfm_kmeans_results.csv", index=False)
 
 
 # 5️⃣ Evaluate clustering quality with Silhouette Score ranging from -1 to +1. Good scores are > 0.5
